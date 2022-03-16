@@ -130,6 +130,10 @@ class PredictionReport:
     ProbabilityPercent
     Data Range
     """
+    user_id = ReferenceField('User', required=True)
+    tag = StringField(required=True, max_length=50)
+    probability_percent = FloatField(required=True)
+    date_range = ListField(DateTimeField(required=True), max_length=2)
     pass
 
 
@@ -139,6 +143,9 @@ class PriceComparison:
     Best Price
     Business PLace
     """
+    tag = StringField(required=True, max_length=50)
+    total_price = FloatField(required=True)
+    business_place = StringField(required=True, max_length=50)
     pass
 
 
@@ -148,7 +155,13 @@ class UserRequest:
     Request Resolved
     Receipt ID
     """
+    user_id = ReferenceField('User', required=True)
+    receipt_id = IntField(required=True)
+    request_resolved = BooleanField(required=True)
+
+
     pass
+
 
 
 class ERCARecord:
