@@ -1,6 +1,7 @@
 """
 MongoDB online database (MongoDB Atlas)
 """
+from ast import List
 from mongoengine import *
 from datetime import datetime
 
@@ -42,7 +43,7 @@ class User(Document):
 #
 class Receipt(Document):
     """
-    TIN Number
+    TIN Number 
     FS Number
     Issued Date
     Business Place Name
@@ -50,6 +51,18 @@ class Receipt(Document):
     Total Price
     Date Created On
     """
+    tin_number = IntField(required=True)
+    fs_number = IntField(required=True,unique=True)
+    issued_date = DateTimeField(required=True)
+    business_place_name = StringField(required=True, max_length=50)
+    description = StringField(required=True, max_length=50)
+    total_price = FloatField(required=True)
+    date_created_on = DateTimeField(default=datetime.utcnow)
+
+
+
+    
+
     pass
 
 
@@ -61,6 +74,14 @@ class PurchasedItems(Document):
     Price
     Group / Standard Names
     """
+    receipt_id = IntField(required=True)
+    name = StringField(required=True, max_length=50)
+    quantity = IntField(required=True)
+    item_price = FloatField(required=True)
+    tag = ReferenceField('ItemsDictionary', required=True)
+
+
+
     pass
 
 
@@ -69,6 +90,10 @@ class ItemsDictionary(Document):
     Standard Name
     default == uncategorized
     """
+    tag = StringField(required=True, max_length=50)
+
+
+
     pass
 #
 # class ReceiptImages:
@@ -85,6 +110,13 @@ class ExpenseSummary:
     Title
     Description
     """
+    user_id = ReferenceField('User', required=True)
+    receipt_id_list = ListField(ReferenceField('Receipt', required=True))
+    total_price = FloatField(required=True)
+    title = StringField(required=True, max_length=50)
+    description = StringField(required=True, max_length=50)
+
+
     pass
 #
 #
@@ -100,6 +132,14 @@ class FraudReport:
     Date Issued
 
     """
+    user_id = ReferenceField('User', required=True)
+    tin_number = IntField(required=True)
+    fs_number = IntField(required=True,unique=True)
+    total_price = FloatField(required=True)
+    reported = BooleanField(required=True)
+    issued_date = DateTimeField(required=True)
+
+
     pass
 #
 #
@@ -128,4 +168,8 @@ class ERCARecord:
     Total Price
     Date Issued
     """
+    tin_number = IntField(required=True)
+    fs_number = IntField(required=True,unique=True)
+    total_price = FloatField(required=True)
+    issued_date = DateTimeField(required=True)
     pass

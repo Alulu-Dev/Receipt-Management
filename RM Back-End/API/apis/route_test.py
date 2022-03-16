@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from ..core.DatabaseModel import User
+from core.DatabaseModel import User
 
 api = Namespace('Test', description='End point test')
 
