@@ -9,10 +9,17 @@ class TestRoute(Resource):
     @api.doc('First Route')
     def get(self):
         """List all cats"""
-        # user = User(
-        #     title="test-101",
-        #     year=1998,
-        #     rated='R'
-        # )
-        # user.save()
+        user = User(
+            username = "AluluSuperAdmin",
+            first_name = "Eshtaol",
+            last_name = "Girma",
+            email = "westegb@gmail.com",
+            password = "abc123",
+            profile_picture = "..alulu.jpg",
+            status = "Active",
+            type = "SuperAdmin",
+           
+        )
+        user.save()
         return "Running"
+
