@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_mongoengine import MongoEngine
-from settings import MONGO_URI
-from apis import api as api_namespace
+from .settings import MONGO_URI
+from .apis import api as api_namespace
 
 app = Flask(__name__)
 

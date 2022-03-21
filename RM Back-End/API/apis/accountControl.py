@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 
 from ..core.userControl import (user_signup, admin_signup, delete_account,
                                 get_customer, update_customer, status_control,
-                                all_users)
+                                )
 from ..core.validators import check_file, check_signup_form, admin_role_required, check_update_form
 from ..core.models import signup_form, update_form, id_form, status_form
 

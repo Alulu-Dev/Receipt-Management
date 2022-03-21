@@ -1,2 +1,3 @@
-from .inputvalidation import validate_signup_input as check_signup_form, validate_update_input as check_update_form
+from .fileValidation import validate_attached_file as check_file
+from .inputValidation import validate_signup_input as check_signup_form, validate_update_input as check_update_form
 from .accessLevelValidation import admin_role_required
