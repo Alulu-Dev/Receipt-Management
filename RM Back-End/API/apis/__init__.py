@@ -2,6 +2,7 @@ from flask_restx import Api
 from .route_test import api as api1
 from .accountControl import api as account_management
 from .sessionControl import session as session_management
+from .receiptUploader import api as file_upload
 
 api = Api(
     title='Testing Endpoints',
@@ -11,5 +12,6 @@ api = Api(
 
 api.add_namespace(session_management)
 api.add_namespace(account_management)
+api.add_namespace(file_upload)
 
 api.add_namespace(api1)
