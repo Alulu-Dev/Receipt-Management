@@ -1,11 +1,14 @@
 import io
+from PIL import UnidentifiedImageError
+from bson import ObjectId
 from googleapiclient.http import MediaIoBaseDownload
-from mongoengine import ValidationError
+from mongoengine import ValidationError, DoesNotExist
 
 from API.Google import drive_service
 
 from ..models import UserRequest, receiptDataModel, receiptItems
 from .imageUploading import check_user_folder
+from ..routineJobs import routine_manager
 
 drive = drive_service()
 
@@ -45,7 +48,7 @@ def display_customers_verification_request(user):
                  'Receipt': x.receipt_id,
                  'status': 'Resolved' if x.request_resolved else 'Unresolved'}
                 for x in requests)
-    except ValidationError:
+    except DoesNotExist:
         return "Data could be fetched", 501
 
 
@@ -53,12 +56,22 @@ def create_customer_verification_request(user, receipt):
     try:
         new_request = UserRequest()
         new_request.user_id = user
-        new_request.receipt_id = receipt
+        new_request.receipt_id = ObjectId(receipt)
 
         new_request.save()
-        return new_request.id, 201
+        return 'Requested created', 201
     except ValidationError:
         return "Data could be fetched", 501
+
+
+def get_all_receipt(user):
+    receipts = receiptDataModel.objects(owner=user)
+    list_of_receipts = []
+    for receipt in receipts:
+        result = get_receipt_data(receipt.id)
+        list_of_receipts.append(result)
+
+    return list_of_receipts
 
 
 def get_receipt_data(receipt_id):
@@ -88,7 +101,7 @@ def get_receipt_data(receipt_id):
 def get_receipt_image_id(username, receipt_id):
     try:
         if not check_user_folder(username):
-            raise ConnectionError
+            raise UnidentifiedImageError
         parent_uid = check_user_folder(username)
         # check for the receipt image
         query = f"parents='{parent_uid}'"
@@ -103,10 +116,9 @@ def get_receipt_image_id(username, receipt_id):
             if receipt_id in file['name']:
                 # return file['id']
                 return download_receipt_image(file_id=file['id'])
-        raise ConnectionError
-    except ConnectionError:
+        raise UnidentifiedImageError
+    except UnidentifiedImageError:
         return "Image could not fetched"
-
 
 def download_receipt_image(file_id):
     try:
@@ -146,6 +158,7 @@ def update_receipt_details_manually(receipt_id, new_data):
         current_data.save()
     except ValidationError:
         return "Data Couldn't Be Fetched", 500
+
 
 def update_items_details_manually(receipt_id, new_data):
     try:
