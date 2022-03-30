@@ -147,3 +147,16 @@ def update_receipt_details_manually(receipt_id, new_data):
     except ValidationError:
         return "Data Couldn't Be Fetched", 500
 
+def update_items_details_manually(receipt_id, new_data):
+    try:
+        current_data = receiptItems.objects.get(id=receipt_id)
+
+        if 'name' in new_data and new_data['name'] != current_data.name:
+            current_data.name = new_data['name']
+        if 'quantity' in new_data and new_data['quantity'] != current_data.quantity:
+            current_data.quantity = new_data['quantity']
+        if 'item_price' in new_data and new_data['item_price'] != current_data.item_price:
+            current_data.item_price = new_data['item_price']
+        current_data.save()
+    except ValidationError:
+        return "Data Couldn't Be Fetched", 500
