@@ -8,7 +8,6 @@ from API.Google import drive_service
 
 from ..models import UserRequest, receiptDataModel, receiptItems
 from .imageUploading import check_user_folder
-from ..routineJobs import routine_manager
 
 drive = drive_service()
 
