@@ -42,3 +42,19 @@ def receipt_form(items):
         )
     }
     return new_receipt_model
+
+
+receipt_identifier = {
+    'fs number': fields.String,
+    'register id': fields.String,
+}
+
+
+def expense_form(identifier):
+    expense_template = {
+        'receipt_list': fields.List(fields.Nested(identifier)),
+        'title': fields.String,
+        'note': fields.String,
+    }
+
+    return expense_template
