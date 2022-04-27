@@ -13,11 +13,26 @@ from .priceComparisonControl import api as price_management
 # test endpoints
 from .testApis.uploadReceiptData import api as test_api
 
-api = Api(
-    title='Testing Endpoints',
+from .sessionControl import admin_session, customer_session
+
+
+blueprint_v1 = Blueprint('api_v1', __name__)
+api_v1 = Api(
+    blueprint_v1,
+    title='Alulu API',
     version='1.0',
-    description='To test the configuration settings',
+    description='Alulu Application Customers API',
 )
+api_v1.add_namespace(customer_session)
+
+blueprint_v2 = Blueprint('api_v2', __name__)
+api_v2 = Api(
+    blueprint_v2,
+    title='Alulu API',
+    version='2.0',
+    description='Alulu Application Admins API',
+)
+api_v2.add_namespace(admin_session)
 
 api.add_namespace(session_management)
 api.add_namespace(account_management)
