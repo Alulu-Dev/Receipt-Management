@@ -15,7 +15,7 @@ from .testApis.uploadReceiptData import api as test_api
 
 from .sessionControl import admin_session, customer_session
 from .receiptControl import admin_receipt, customer_receipt
-
+from .verificationControl import admin_verification, customer_verification
 blueprint_v1 = Blueprint('api_v1', __name__)
 api_v1 = Api(
     blueprint_v1,
@@ -25,7 +25,7 @@ api_v1 = Api(
 )
 api_v1.add_namespace(customer_session)
 api_v1.add_namespace(customer_receipt)
-
+api_v1.add_namespace(customer_verification)
 
 blueprint_v2 = Blueprint('api_v2', __name__)
 api_v2 = Api(
@@ -36,6 +36,7 @@ api_v2 = Api(
 )
 api_v2.add_namespace(admin_session)
 api_v2.add_namespace(admin_receipt)
+api_v2.add_namespace(admin_verification)
 api.add_namespace(session_management)
 api.add_namespace(account_management)
 api.add_namespace(report_management)
