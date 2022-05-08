@@ -11,6 +11,11 @@ receipt_parser.add_argument('Total', location='form', type=str, required=True)
 receipt_parser.add_argument('Register ID', location='form', type=str, required=True)
 receipt_parser.add_argument('Description', location='form', type=str, required=True)
 
+login_model = {
+    'email': fields.String,
+    'password': fields.String,
+}
+
 items_model = {
     'name': fields.String,
     'quantity': fields.Float,
@@ -36,6 +41,7 @@ def receipt_form(items):
         'business_place_name': fields.String,
         'description': fields.String,
         'register_id': fields.String,
+        "category_id": fields.String,
         'total_price': fields.Float,
         'Items': fields.List(
             fields.Nested(items)
