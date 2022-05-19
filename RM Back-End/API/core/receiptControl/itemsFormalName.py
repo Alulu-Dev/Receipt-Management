@@ -5,8 +5,8 @@ from ..models import receiptItems, ItemsDictionary
 
 
 def create_formal_name(name):
-    new_tag = ItemsDictionary
-    new_tag.name = name
+    new_tag = ItemsDictionary()
+    new_tag.tag = name
     new_tag.save()
 
     return str(new_tag.id)
@@ -18,7 +18,8 @@ def add_formal_name_to_items(tag_id, item_id):
         tag_id = ObjectId(tag_id)
 
         if ItemsDictionary.objects.get(id=tag_id):
-            item.tag = tag_id
+            item.update(set__tag=tag_id)
+            return 'Ok'
     except ResponseError:
         return "Operation failed", 501
 
@@ -29,7 +30,8 @@ def remove_formal_name_to_items(tag_id, item_id):
         tag_id = ObjectId(tag_id)
 
         if ItemsDictionary.objects.get(id=tag_id):
-            item.tag = None
+            item.update(set__tag=None)
+            return "Removed", 201
     except ResponseError:
         return "Operation failed", 501
 

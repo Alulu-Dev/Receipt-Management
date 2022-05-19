@@ -8,6 +8,7 @@ drive = drive_service()
 
 
 def check_user_folder(username):
+    print(1)
     # check if the username has a folder
     query = f"parents='{RECEIPT_IMAGE_STORAGE}'"
     response = drive.files().list(q=query).execute()
@@ -53,7 +54,7 @@ def upload_image_to_drive(username, receipt_id, file_path, file_mimetype):
                 "SuperAdmin 2341c3773b3e717238f04dff 2022-03-19 12:45:35"
     """
     file_metadata = {
-        'name': username + ' ' + hex(receipt_id) + ' ' + datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        'name': username + ' ' + receipt_id + ' ' + datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         'parents': [user_folder_id]
     }
     # create receipt image

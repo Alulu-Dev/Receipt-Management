@@ -1,12 +1,13 @@
 import io
 from PIL import UnidentifiedImageError
 from bson import ObjectId
+from flask_login import current_user
 from googleapiclient.http import MediaIoBaseDownload
 from mongoengine import ValidationError, DoesNotExist
 
 from API.Google import drive_service
 
-from ..models import UserRequest, receiptDataModel, receiptItems
+from ..models import UserRequest, receiptDataModel, receiptItems, Categories
 from .imageUploading import check_user_folder
 
 drive = drive_service()
@@ -19,34 +20,36 @@ def display_verification_request():
         resolved_requests = []
         unresolved_requests = []
         for request in requests:
-            if request.request_resolved:
+            if request.resolved:
                 resolved_requests.append({
-                    "User": request.user_id,
-                    'Receipt': request.receipt_id,
-                    'status': 'Resolved',
+                    "User": request.user_id.email,
+                    'Receipt': request.receipt_id.tin_number,
+                    'status': ['Resolved'],
                 })
             else:
                 unresolved_requests.append({
-                    "User": request.user_id,
-                    'Receipt': request.receipt_id,
-                    'status': 'Unresolved',
+                    "User": request.user_id.email,
+                    'Receipt': request.receipt_id.tin_number,
+                    'status': ['Unresolved'],
                 })
         return {
             'Resolved Requests': resolved_requests,
             'Unresolved Requests': unresolved_requests
         }
-    except ValidationError:
+    except (DoesNotExist, ValidationError):
         return "Data could be fetched", 501
 
 
 def display_customers_verification_request(user):
     try:
-        requests = UserRequest.objects.get(user_id=user)
-
-        return ({"User": x.user_id,
-                 'Receipt': x.receipt_id,
-                 'status': 'Resolved' if x.request_resolved else 'Unresolved'}
-                for x in requests)
+        requests = UserRequest.objects(user_id=user)
+        list_of_request = []
+        for request in requests:
+            data = {"receipt_id": str(request.receipt_id.id),
+                    'Receipt': request.receipt_id.business_place_name,
+                    'status': 'Resolved' if request.resolved else 'Unresolved'}
+            list_of_request.append(data)
+        return list_of_request, 200
     except DoesNotExist:
         return "Data could be fetched", 501
 
@@ -61,6 +64,18 @@ def create_customer_verification_request(user, receipt):
         return 'Requested created', 201
     except ValidationError:
         return "Data could be fetched", 501
+
+
+def check_receipt_verification_status(receipt):
+    try:
+        receiptDataModel.objects.get(id=receipt, owner=current_user.id)
+        try:
+            request = UserRequest.objects.get(receipt_id=receipt, user_id=current_user.id)
+            return request.resolved
+        except DoesNotExist:
+            return "Request unsent"
+    except DoesNotExist:
+        return "Receipt unsent"
 
 
 def get_all_receipt(user):
@@ -78,18 +93,21 @@ def get_receipt_data(receipt_id):
     list_of_items = []
     for item in receiptData.items:
         i = {
-            'name ': item.name,
-            'quantity ': item.quantity,
+            'id': str(item.id),
+            'name': item.name,
+            'quantity': item.quantity,
             'price': item.item_price,
         }
         list_of_items.append(i)
 
     data = {
+        'id': str(receiptData.id),
         'tin number': receiptData.tin_number,
         'fs number': receiptData.fs_number,
         'issued date': receiptData.issued_date.strftime("%Y-%m-%d %H:%M:%S"),
         'business place name': receiptData.business_place_name,
         'description': receiptData.description,
+        "category": receiptData.category_id.category_name,
         'total price': receiptData.total_price,
         'register id': receiptData.register_id,
         'items': list_of_items,
@@ -119,6 +137,7 @@ def get_receipt_image_id(username, receipt_id):
     except UnidentifiedImageError:
         return "Image could not fetched"
 
+
 def download_receipt_image(file_id):
     try:
         request = drive.files().get_media(fileId=file_id,
@@ -137,24 +156,29 @@ def download_receipt_image(file_id):
 
 def update_receipt_details_manually(receipt_id, new_data):
     try:
-        current_data = receiptDataModel.objects.get(id=receipt_id)
+        current_data = receiptDataModel.objects.get(id=ObjectId(receipt_id))
+        Categories.objects.get(id=ObjectId(new_data['category_id']))
 
-        if 'tin_number' in new_data and new_data['tin_number'] != current_data.tin_number:
+        if new_data['tin_number'] != "" and new_data['tin_number'] != current_data.tin_number:
             current_data.tin_number = new_data['tin_number']
-        if 'fs_number' in new_data and new_data['fs_number'] != current_data.fs_number:
+        if new_data['fs_number'] != "" and new_data['fs_number'] != current_data.fs_number:
             current_data.fs_number = new_data['fs_number']
-        if 'issued_date' in new_data and new_data['issued_date'] != current_data.issued_data:
-            current_data.issued_data = new_data['issued_date']
-        if 'business_place_name' in new_data and new_data['business_place_name'] != current_data.business_place_name:
+        if new_data['issued_date'] != "" and new_data['issued_date'] != current_data.issued_date:
+            current_data.issued_date = new_data['issued_date']
+        if new_data['business_place_name'] != "" and new_data[
+            'business_place_name'] != current_data.business_place_name:
             current_data.business_place_name = new_data['business_place_name']
-        if 'description' in new_data and new_data['description'] != current_data.description:
+        if new_data['description'] != "" and new_data['description'] != current_data.description:
             current_data.description = new_data['description']
-        if 'total_price' in new_data and new_data['total_price'] != current_data.total_price:
+        if new_data['category_id'] != "" and new_data['category_id'] != current_data.category_id:
+            current_data.category_id = ObjectId(new_data['category_id'])
+        if new_data['total_price'] != "" and new_data['total_price'] != current_data.total_price:
             current_data.total_price = new_data['total_price']
-        if 'register_id' in new_data and new_data['register_id'] != current_data.register_id:
+        if new_data['register_id'] != "" and new_data['register_id'] != current_data.register_id:
             current_data.register_id = new_data['register_id']
 
         current_data.save()
+        return "details updated", 201
     except ValidationError:
         return "Data Couldn't Be Fetched", 500
 
