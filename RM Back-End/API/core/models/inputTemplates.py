@@ -4,7 +4,7 @@ from werkzeug.datastructures import FileStorage
 
 # input data format for signup
 signup_input_parser = reqparse.RequestParser()
-signup_input_parser.add_argument('username', location='form', type=str, required=True)
+# signup_input_parser.add_argument('username', location='form', type=str, required=True)
 signup_input_parser.add_argument('firstname', location='form', type=str, required=True)
 signup_input_parser.add_argument('lastname', location='form', type=str, required=True)
 signup_input_parser.add_argument('email', location='form', type=str, required=True)
@@ -13,10 +13,11 @@ signup_input_parser.add_argument('file', location='files', type=FileStorage, req
 
 # input data format for updating details
 update_input_parser = reqparse.RequestParser()
-update_input_parser.add_argument('username', location='form', type=str)
+# update_input_parser.add_argument('username', location='form', type=str)
 update_input_parser.add_argument('firstname', location='form', type=str)
 update_input_parser.add_argument('lastname', location='form', type=str)
 update_input_parser.add_argument('email', location='form', type=str)
+update_input_parser.add_argument('old-password', location='form', type=str)
 update_input_parser.add_argument('password', location='form', type=str)
 update_input_parser.add_argument('file', location='files', type=FileStorage)
 

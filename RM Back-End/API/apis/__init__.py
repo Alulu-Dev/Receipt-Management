@@ -14,8 +14,9 @@ from .priceComparisonControl import api as price_management
 from .testApis.uploadReceiptData import api as test_api
 
 from .sessionControl import admin_session, customer_session
-from .receiptControl import admin_receipt, customer_receipt
-from .verificationControl import admin_verification, customer_verification
+from .accountControl import admin_account, customer_account
+from .reportControl import admin_report, customer_report
+
 blueprint_v1 = Blueprint('api_v1', __name__)
 api_v1 = Api(
     blueprint_v1,
@@ -24,8 +25,18 @@ api_v1 = Api(
     description='Alulu Application Customers API',
 )
 api_v1.add_namespace(customer_session)
+api_v1.add_namespace(customer_account)
 api_v1.add_namespace(customer_receipt)
 api_v1.add_namespace(customer_verification)
+api_v1.add_namespace(customer_report)
+api_v1.add_namespace(price_management)
+api_v1.add_namespace(prediction_management)
+api_v1.add_namespace(file_upload)
+api_v1.add_namespace(file_scan)
+
+api_v1.add_namespace(api_test)
+api_v1.add_namespace(test_api)
+
 
 blueprint_v2 = Blueprint('api_v2', __name__)
 api_v2 = Api(
@@ -35,18 +46,8 @@ api_v2 = Api(
     description='Alulu Application Admins API',
 )
 api_v2.add_namespace(admin_session)
+api_v2.add_namespace(admin_account)
 api_v2.add_namespace(admin_receipt)
 api_v2.add_namespace(admin_verification)
-api.add_namespace(session_management)
-api.add_namespace(account_management)
-api.add_namespace(report_management)
-api.add_namespace(tags_management)
-api.add_namespace(verification_management)
-api.add_namespace(receipt_management)
-api.add_namespace(price_management)
-
-api.add_namespace(file_upload)
-api.add_namespace(file_scan)
-
-api.add_namespace(api_test)
-api.add_namespace(test_api)
+api_v2.add_namespace(admin_report)
+api_v2.add_namespace(tags_management)
