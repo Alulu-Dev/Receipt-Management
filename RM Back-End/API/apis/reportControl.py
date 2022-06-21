@@ -1,4 +1,5 @@
 from flask import request
+from flask_cors import cross_origin
 from flask_login import login_required, current_user
 from flask_restx import Namespace, Resource
 
@@ -17,13 +18,13 @@ expense_model = api.model("expense", expense_form(identifier))
 @api.route('/system/')
 class SystemUsageSummary(Resource):
     @api.doc('General Summary report generator')
-    @admin_role_required
-    @login_required
+    # @login_required
+    # @admin_role_required
+    @cross_origin()
     def get(self):
         """
          create a mock data receipt
         """
-        # return request.json
         try:
             return system_report(), 200
         except:

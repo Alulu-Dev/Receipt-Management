@@ -1,11 +1,15 @@
 from datetime import date
-from ..models import accountModel, receiptDataModel, UserRequest, FraudReport
+
+from mongoengine import ValidationError, NotUniqueError
+
+from ..models import (accountModel, receiptDataModel, UserRequest, FraudReport,
+                      Categories)
 
 
 def total_uploaded_receipts():
     all_receipts = receiptDataModel.objects.all()
 
-    return  len(all_receipts)
+    return len(all_receipts)
 
 
 def total_fraud_receipts_caught():
@@ -34,27 +38,54 @@ def total_registered_users():
 
 
 def users_count_per_month():
-    data = {
-        'January': 0,
-        'February': 0,
-        'March': 0,
-        'April': 0,
-        'May': 0,
-        'June': 0,
-        'July': 0,
-        'August': 0,
-        'September': 0,
-        'October': 0,
-        'November': 0,
-        'December': 0
-    }
+    data = [
+        {
+            "name": "Jan",
+            "Active User": 0
+        }, {
+            "name": "Feb",
+            "Active User": 0
+        }, {
+            "name": "Mar",
+            "Active User": 0
+        }, {
+            "name": "Apr",
+            "Active User": 0
+        },{
+            "name": "May",
+            "Active User": 0
+        }, {
+            "name": "Jun",
+            "Active User": 0
+        }, {
+            "name": "Jul",
+            "Active User": 0
+        }, {
+            "name": "Aug",
+            "Active User": 0
+        }, {
+            "name": "Sep",
+            "Active User": 0
+        }, {
+            "name": "Oct",
+            "Active User": 0
+        }, {
+            "name": "Nov",
+            "Active User": 0
+        }, {
+            "name": "Dec",
+            "Active User": 0
+        }
+
+    ]
     all_users = accountModel.objects()
     current_year = date.today().year
     for user in all_users:
         if user.status == "Active" or user.status == "Blocked":
-            if user.data_created.year == current_year:
+            if user.data_created.year == current_year and user.account_type != "SuperAdmin":
                 month = user.data_created.month
-                data[list(data)[month-1]] = data[list(data)[month-1]] + 1
+                data[month - 1]['Active User'] = data[month - 1]['Active User'] + 1
+                # data[list(data)[month - 1]] = data[list(data)[month - 1]] + 1
 
     return data
 
@@ -66,7 +97,7 @@ def formatted_system_report():
     total_fraud = total_fraud_receipts_caught()
     total_request = total_request_unresolved()
     data = {
-        "Total Users": total_users,
+        "Total Users": total_users - 1,
         "Total Receipts": total_receipts,
         "Total Fraud Case": total_fraud,
         "Total Requests": total_request,
@@ -74,3 +105,14 @@ def formatted_system_report():
     }
 
     return data
+
+
+def add_expense_category(cat_name):
+    try:
+        category = Categories()
+        category.category_name = cat_name
+        category.save()
+        return "Created category", 201
+    except (ValidationError, NotUniqueError):
+        return "creation failed", 500
+

@@ -54,7 +54,7 @@ def upload_image_to_drive(username, receipt_id, file_path, file_mimetype):
                 "SuperAdmin 2341c3773b3e717238f04dff 2022-03-19 12:45:35"
     """
     file_metadata = {
-        'name': username + ' ' + receipt_id + ' ' + datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        'name': username + ' ' + str(receipt_id) + ' ' + datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         'parents': [user_folder_id]
     }
     # create receipt image
@@ -67,6 +67,6 @@ def upload_image_to_drive(username, receipt_id, file_path, file_mimetype):
             media_body=media_content,
         ).execute()
         if file.get('id'):
-            return file.get('name'), 201
+            return str(receipt_id), 201
     except ConnectionError:
         return False, 500

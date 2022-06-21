@@ -8,6 +8,8 @@ from .settings import MONGO_URI, ALULU_APP_MONGO_DATABASE, APP_SECRET_KEY
 # from .apis import api as api_namespace
 from .apis import blueprint_v1 as api_v1, blueprint_v2 as api_v2
 from .core.models import accountModel
+from .core.routineJobs import routine_manager
+
 
 app = Flask(__name__)
 
@@ -24,6 +26,7 @@ db = MongoEngine(app)
 login_manager = LoginManager(app)
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 jwt = JWTManager(app)
+routine_manager()
 
 
 @login_manager.user_loader

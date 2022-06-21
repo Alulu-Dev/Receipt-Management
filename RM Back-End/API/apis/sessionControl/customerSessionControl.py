@@ -22,7 +22,7 @@ class Login(Resource):
 class Logout(Resource):
     @session.doc("log out user from the system")
     @login_required
-    @cross_origin()
+    # @cross_origin()
     def post(self):
         """
         logging out of the system

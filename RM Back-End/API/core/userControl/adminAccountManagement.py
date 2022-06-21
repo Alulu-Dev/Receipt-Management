@@ -12,7 +12,7 @@ from ..models import accountModel, StatusLog, ActiveAdmins
 
 def upgrade_customer_to_admin(user_id):
     try:
-        user_account = accountModel.objects.get(id=user_id)
+        user_account = accountModel.objects.get(id=ObjectId(user_id))
         user_account.update(account_type='Admin')
 
         return "Upgraded to Admin"
@@ -20,6 +20,16 @@ def upgrade_customer_to_admin(user_id):
     except ResponseError:
         return "User not upgraded to Admin", 500
 
+
+def downgrade_customer_to_admin(user_id):
+    try:
+        user_account = accountModel.objects.get(id=ObjectId(user_id))
+        user_account.update(account_type='Customer')
+
+        return "Upgraded to Admin"
+
+    except ResponseError:
+        return "User not upgraded to Admin", 500
 
 def change_account_status(user_id, action, note):
     try:
@@ -64,6 +74,7 @@ def get_all_users():
                     "id": str(user.id),
                     "numOfReceipts": user.receipt_count,
                     "tags": [user.status],
+                    "type": user.account_type,
                 }
                 list_of_users.append(data)
         return list_of_users, 200

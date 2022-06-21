@@ -1,4 +1,5 @@
 from flask import request
+from flask_login import login_required, current_user
 from flask_restx import Resource, Namespace
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -13,11 +14,11 @@ upload_parser = api.parser()
 upload_parser.add_argument('file', location='files', type=FileStorage, required=True)
 
 
-@api.route('/upload')
+@api.route('/upload/<receipt_id>/')
 class ReceiptUpload(Resource):
-
     @api.expect(upload_parser)
-    def post(self):
+    @login_required
+    def post(self, receipt_id):
         """
         upload receipt image to the system
         """
@@ -30,7 +31,7 @@ class ReceiptUpload(Resource):
                 # return file.mimetype
 
                 # 2nd step
-                return upload_image_to_drive('AluluSuperAdmin', 0x6231c3773b3e717238f04daa, file_path, file.mimetype)
+                return upload_image_to_drive(current_user.email, receipt_id, file_path, file.mimetype)
         else:
             return False, 406
 

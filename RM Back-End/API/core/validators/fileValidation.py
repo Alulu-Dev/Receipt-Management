@@ -1,14 +1,24 @@
+
+
 def validate_attached_file(request):
-    supported_formats = ['image/avif', 'image/bmp', 'image/gif', 'image/heic',
+    supported_formats = ['image/jpg', 'image/bmp', 'image/gif', 'image/heic',
                          'image/heif', 'image/jpeg', 'image/png', 'image/webp'
                          ]
 
     if 'file' not in request.files:
-        return 'No File Found', 400
+        raise CustomFileValidationException('No File Found')
     file = request.files['file']
 
     if file.filename == '':
-        return 'No File Found', 400
+        raise CustomFileValidationException('No File Found')
     if file.mimetype in supported_formats:
         return True
-    return False
+    raise CustomFileValidationException("File Format not supported! File must be an Image")
+
+
+class CustomFileValidationException(Exception):
+    def __init__(self, m):
+        self.message = m
+
+    def __str__(self):
+        return self.message

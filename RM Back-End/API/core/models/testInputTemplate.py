@@ -51,8 +51,7 @@ def receipt_form(items):
 
 
 receipt_identifier = {
-    'fs number': fields.String,
-    'register id': fields.String,
+    'receipt id': fields.String,
 }
 
 

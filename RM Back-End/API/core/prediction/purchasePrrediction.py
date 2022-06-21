@@ -137,17 +137,21 @@ def predict(data):
 
 
 def get_prediction(user):
-    user_previous_purchase_history_items = get_user_items(user)
-    stage1_preprocessed_data = group_items_with_same_date_and_name(user_previous_purchase_history_items)
-    stage2_preprocessed_data = group_purchase_by_week(stage1_preprocessed_data)
-    data_set = weekly_purchase_dict_to_list(stage2_preprocessed_data)
-    predictions = predict(data_set)
-    sorted_prediction = sorted(predictions['items'], key=lambda d: d['probability'], reverse=True)
+    try:
+        user_previous_purchase_history_items = get_user_items(user)
+        stage1_preprocessed_data = group_items_with_same_date_and_name(user_previous_purchase_history_items)
+        stage2_preprocessed_data = group_purchase_by_week(stage1_preprocessed_data)
+        data_set = weekly_purchase_dict_to_list(stage2_preprocessed_data)
+        print(data_set)
+        predictions = predict(data_set)
+        sorted_prediction = sorted(predictions['items'], key=lambda d: d['probability'], reverse=True)
 
-    top_5_predictions = {
-        "year": predictions["year"],
-        "week_no": predictions["week_no"],
-        'items': sorted_prediction[:5]
-    }
+        top_5_predictions = {
+            "year": predictions["year"],
+            "week_no": predictions["week_no"],
+            'items': sorted_prediction[:5]
+        }
 
-    return top_5_predictions
+        return top_5_predictions, 200
+    except ValueError:
+        return "Not enough Data", 400

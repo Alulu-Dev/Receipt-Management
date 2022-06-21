@@ -5,7 +5,8 @@ from flask_login import login_required, current_user
 from flask_restx import Namespace, Resource
 from mongoengine import ValidationError, DoesNotExist
 
-from ..core.receiptControl import (receipt_data, receipt_image, all_receipt)
+from ..core.receiptControl import (receipt_data, receipt_image, all_receipt,
+                                   delete_receipt)
 from ..core.models import receipt_model, items_model
 
 api = Namespace('receipt', description="Endpoint to control receipt records")
@@ -31,6 +32,7 @@ class GetAllReceipt(Resource):
 @api.route('/get_data/<receipt_id>/')
 class GetReceiptData(Resource):
     @api.doc("Get receipt data")
+    @login_required
     def get(self, receipt_id):
         try:
             return receipt_data(receipt_id)
@@ -54,4 +56,12 @@ class GetReceiptData(Resource):
             return "Receipt could not found", 501
 
 
-
+@api.route('/delete/<receipt_id>/')
+class DeleteReceipt(Resource):
+    @api.doc("Delete receipt")
+    @login_required
+    def delete(self, receipt_id):
+        try:
+            return delete_receipt(receipt_id)
+        except DoesNotExist:
+            return "Receipt could not found"

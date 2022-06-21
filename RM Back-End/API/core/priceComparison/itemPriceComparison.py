@@ -45,7 +45,8 @@ def compare_items_price(item, user):
                         'Shop': item.receipt_id.business_place_name,
                         'price': item.item_price / item.quantity
                     }
-                    item_details.append(data)
+                    if data not in item_details:
+                        item_details.append(data)
 
                 sorted_list = sorted(item_details, key=lambda k: k["price"])
 

@@ -5,7 +5,7 @@ from mongoengine import DoesNotExist
 from ..models import receiptDataModel, receiptItems, UserRequest
 
 
-def delete_receipt_permanent(receipt):
+def delete_receipt_permanently(receipt):
     try:
         today = datetime.today()
         receipts = receiptDataModel.objects(deleted=True)
@@ -31,8 +31,8 @@ def delete_receipt_permanent(receipt):
 def delete_receipt(receipt_id):
     try:
         receipt = receiptDataModel.objects.get(id=receipt_id)
-        receipt.deleted = True
-        receipt.deleted_on = datetime.utcnow
+        receipt.update(deleted=True)
+        receipt.update(set__deleted_on=datetime.utcnow)
         return True, 200
 
     except:

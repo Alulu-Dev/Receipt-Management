@@ -1,5 +1,7 @@
 from flask import request
+from flask_cors import cross_origin
 from flask_restx import Namespace, Resource
+from mongoengine import ValidationError
 from werkzeug.utils import secure_filename
 from tempfile import TemporaryDirectory
 from flask_login import current_user, login_required
@@ -7,9 +9,9 @@ from flask_login import current_user, login_required
 from ..core.userControl import (user_signup, admin_signup, delete_account,
                                 get_customer, update_customer, status_control,
                                 )
-from ..core.validators import check_file, check_signup_form, admin_role_required, check_update_form
+from ..core.validators import (check_file, check_signup_form, admin_role_required, check_update_form,
+                               CustomValidationException, CustomFileValidationException)
 from ..core.models import signup_form, update_form, id_form, status_form
-
 
 api = Namespace('account', description="Endpoint to create, update and delete accounts on the system")
 
@@ -23,26 +25,30 @@ class RegisterNewCustomer(Resource):
         """
         Create a system user account and log in automatically
         """
-        if check_file(request) and check_signup_form(request.form):
-            file = request.files['file']
-            with TemporaryDirectory(prefix='file_holder') as tempdir:
-                filename = secure_filename(file.filename)
-                file.save(tempdir + '/' + filename)
-                file_path = tempdir + "/" + file.filename
-                return user_signup(request.form, file_path)
-        return "User Not Create", 400
+        try:
+            if check_file(request) and check_signup_form(request.form):
+                file = request.files['file']
+                with TemporaryDirectory(prefix='file_holder') as tempdir:
+                    filename = secure_filename(file.filename)
+                    file.save(tempdir + '/' + filename)
+                    file_path = tempdir + "/" + file.filename
+                    return user_signup(request.form, file_path)
+            return "User Not Create", 400
+        except (CustomValidationException, CustomFileValidationException, ValidationError) as e:
+            return e.message, 400
 
 
 @api.route('/upgrade/user/')
 class UpgradeUserToAdmin(Resource):
     @api.doc("Required Admin level clearance")
     @api.expect(id_form)
-    @admin_role_required
     @login_required
+    @admin_role_required
     def post(self):
         """
         Upgrade user access level to Admin
         """
+
         if request.form['userId']:
             return admin_signup(request.form['userId']), 200
         return False
@@ -51,6 +57,7 @@ class UpgradeUserToAdmin(Resource):
 @api.route('/modify/status/')
 class AdminModifyUserAccount(Resource):
     @api.doc("User")
+    @login_required
     @admin_role_required
     @api.expect(status_form)
     def put(self):
@@ -63,6 +70,7 @@ class AdminModifyUserAccount(Resource):
 @api.route('/user/')
 class UserAccountControl(Resource):
     @api.doc("Get account details")
+    @cross_origin()
     @login_required
     def get(self):
         """
@@ -102,4 +110,3 @@ class UserAccountControl(Resource):
             return update_customer(current_user.id, request.form)
 
         return "Invalid inputs", 400
-

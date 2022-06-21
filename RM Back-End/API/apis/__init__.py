@@ -1,21 +1,32 @@
+from flask import Blueprint
 from flask_restx import Api
 from .route_test import api as api_test
 from .receiptUploader import api as file_upload
 from .receiptScanning import api as file_scan
-from .accountControl import api as account_management
-from .sessionControl import session as session_management
+
+from .predictionControl import api as prediction_management
+
+# from .accountControl import api as account_management
+from .accountControl import admin_account, customer_account
+
+# from .sessionControl import session as session_management
+from .sessionControl import admin_session, customer_session
+
 from .tagsControl import api as tags_management
-from .verificationControl import api as verification_management
-from .receiptControl import api as receipt_management
-from .reportControl import api as report_management
+
+# from .verificationControl import api as verification_management
+from .verificationControl import admin_verification, customer_verification
+
+# from .receiptControl import api as receipt_management
+from .receiptControl import admin_receipt, customer_receipt
+
+# from .reportControl import api as report_management
+from .reportControl import admin_report, customer_report
+
 from .priceComparisonControl import api as price_management
 
 # test endpoints
 from .testApis.uploadReceiptData import api as test_api
-
-from .sessionControl import admin_session, customer_session
-from .accountControl import admin_account, customer_account
-from .reportControl import admin_report, customer_report
 
 blueprint_v1 = Blueprint('api_v1', __name__)
 api_v1 = Api(
@@ -51,3 +62,18 @@ api_v2.add_namespace(admin_receipt)
 api_v2.add_namespace(admin_verification)
 api_v2.add_namespace(admin_report)
 api_v2.add_namespace(tags_management)
+
+
+# api.add_namespace(session_management)
+# api.add_namespace(account_management)
+# api.add_namespace(report_management)
+# api.add_namespace(tags_management)
+# api.add_namespace(verification_management)
+# api.add_namespace(receipt_management)
+#
+#
+# api.add_namespace(file_upload)
+# api.add_namespace(file_scan)
+#
+# api.add_namespace(api_test)
+# api.add_namespace(test_api)

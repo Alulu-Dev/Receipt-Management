@@ -31,3 +31,19 @@ status = {
     'status': fields.String,
     'reason': fields.String,
 }
+
+
+# upload receipt data with image
+
+upload_receipt = reqparse.RequestParser()
+upload_receipt.add_argument('file', location='files', type=FileStorage, required=True)
+upload_receipt.add_argument('tin_number', location='form', type=str, required=True)
+upload_receipt.add_argument('fs_number', location='form', type=str, required=True)
+upload_receipt.add_argument('issued_date', location='form', type=str, required=True)
+upload_receipt.add_argument('business_place_name', location='form', type=str, required=True)
+upload_receipt.add_argument('description', location='form', type=str, required=True)
+upload_receipt.add_argument('register_id', location='form', type=str, required=True)
+upload_receipt.add_argument('category_id', location='form', type=str, required=True)
+upload_receipt.add_argument('total_price', location='form', type=str, required=True)
+upload_receipt.add_argument('Items', location='form', type=list, required=True)
+

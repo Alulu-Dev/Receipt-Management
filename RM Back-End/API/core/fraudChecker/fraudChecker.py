@@ -1,3 +1,4 @@
+import json
 from tempfile import TemporaryDirectory
 
 import requests
@@ -6,6 +7,7 @@ from flask import send_file
 from werkzeug.utils import secure_filename
 
 from ..receiptControl import receipt_image
+from ..models import receiptDataModel, FraudReport
 
 
 def report_illegal_receipts(receipt):
@@ -42,6 +44,36 @@ def report_illegal_receipts(receipt):
         return "Receipt could not found", 501
 
 
-def check_legality_of_receipts(receipt):
+def check_legality_of_receipts():
+    """
+        tin-number, fs-number, register-id, total-price, issued-date
+        """
 
-    pass
+    all_receipts = receiptDataModel.objects(fraud_check='unchecked')
+    for receipt in all_receipts:
+        payload = {
+            "tin_number": receipt.tin_number,
+            "register_id": receipt.register_id,
+            "fs_number": receipt.fs_number,
+            "issued_date": receipt.issued_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "total_price": receipt.total_price
+        }
+        response = requests.post('http://127.0.0.1:9000/fraud/check/',
+                                 headers={
+                                     'accept': 'application/json',
+                                     'Content-Type': 'application/json'
+                                 },
+                                 data=json.dumps(payload))
+
+        if response.status_code == 200:
+            if response.json():
+                receipt.update(set__fraud_check='checked')
+                return 'chekced'
+            else:
+                new_fraud = FraudReport()
+                new_fraud.user_id = receipt.owner
+                new_fraud.receipt_id = receipt.id
+                receipt.update(set__fraud_check='illegal')
+                return 'illegal'
+
+        return response.json()

@@ -7,7 +7,7 @@ from mongoengine import ValidationError
 
 from ..core.receiptControl import (receipt_data, receipt_image, receipt_update, item_update,
                                    request_verification, user_verification_request,
-                                   all_verification_request)
+                                   all_verification_request, check_receipt_verification_status)
 from ..core.models import receipt_model, items_model
 from ..core.validators import admin_role_required
 
@@ -17,12 +17,15 @@ items_form = api.model('items', items_model)
 receipt_form = api.model('receipt update', receipt_model)
 
 
-@api.route('/request/<receipt_id>/')
+@api.route('/<receipt_id>/')
 class CreateUserVerificationRequest(Resource):
     @api.doc("Create a verification request for a receipt")
     @login_required
     def post(self, receipt_id):
         return request_verification(current_user.id, receipt_id)
+
+    def get(self, receipt_id):
+        return check_receipt_verification_status(receipt_id)
 
 
 @api.route('/user/')

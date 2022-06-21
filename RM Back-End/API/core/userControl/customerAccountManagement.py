@@ -2,6 +2,7 @@ import datetime
 
 from flask import send_file
 from mongoengine import DoesNotExist
+from pymongo.errors import ServerSelectionTimeoutError
 from urllib3.exceptions import ResponseError
 from flask_login import login_user, current_user, logout_user
 
@@ -10,7 +11,6 @@ from ..models import accountModel, receiptDataModel, UserRequest
 
 def create_new_customer(personal_info, profile_picture):
     try:
-        print(12)
         new_customer = accountModel()
         new_customer.first_name = personal_info['firstname']
         new_customer.last_name = personal_info['lastname']
@@ -112,10 +112,12 @@ def user_login(user_email, user_password):
         elif user.status == "Blocked":
             return "Your account is Blocked! \n " \
                    "Contact the Administrator \n " \
-                   "Email: westegb@gmail.com", 401
+                   "Email: westegb@gmail.com", 406
         elif user.status == "Deleted":
             return "This Account does not Exist Anymore!" \
                    "Contact the Administrator \n " \
-                   "Email: westegb@gmail.com", 401
+                   "Email: westegb@gmail.com", 406
     except DoesNotExist:
         return "Invalid login detail", 401
+    except ServerSelectionTimeoutError:
+        return "Opps! something went wrong", 503

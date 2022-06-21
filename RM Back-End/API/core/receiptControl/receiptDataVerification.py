@@ -23,13 +23,13 @@ def display_verification_request():
             if request.resolved:
                 resolved_requests.append({
                     "User": request.user_id.email,
-                    'Receipt': request.receipt_id.tin_number,
+                    'Receipt': str(request.receipt_id.id),
                     'status': ['Resolved'],
                 })
             else:
                 unresolved_requests.append({
                     "User": request.user_id.email,
-                    'Receipt': request.receipt_id.tin_number,
+                    'Receipt': str(request.receipt_id.id),
                     'status': ['Unresolved'],
                 })
         return {
@@ -79,7 +79,7 @@ def check_receipt_verification_status(receipt):
 
 
 def get_all_receipt(user):
-    receipts = receiptDataModel.objects(owner=user)
+    receipts = receiptDataModel.objects(owner=user, deleted=False)
     list_of_receipts = []
     for receipt in receipts:
         result = get_receipt_data(receipt.id)
@@ -157,7 +157,6 @@ def download_receipt_image(file_id):
 def update_receipt_details_manually(receipt_id, new_data):
     try:
         current_data = receiptDataModel.objects.get(id=ObjectId(receipt_id))
-        Categories.objects.get(id=ObjectId(new_data['category_id']))
 
         if new_data['tin_number'] != "" and new_data['tin_number'] != current_data.tin_number:
             current_data.tin_number = new_data['tin_number']
@@ -170,8 +169,6 @@ def update_receipt_details_manually(receipt_id, new_data):
             current_data.business_place_name = new_data['business_place_name']
         if new_data['description'] != "" and new_data['description'] != current_data.description:
             current_data.description = new_data['description']
-        if new_data['category_id'] != "" and new_data['category_id'] != current_data.category_id:
-            current_data.category_id = ObjectId(new_data['category_id'])
         if new_data['total_price'] != "" and new_data['total_price'] != current_data.total_price:
             current_data.total_price = new_data['total_price']
         if new_data['register_id'] != "" and new_data['register_id'] != current_data.register_id:
@@ -183,16 +180,17 @@ def update_receipt_details_manually(receipt_id, new_data):
         return "Data Couldn't Be Fetched", 500
 
 
-def update_items_details_manually(receipt_id, new_data):
+def update_items_details_manually(item_id, new_data):
     try:
-        current_data = receiptItems.objects.get(id=receipt_id)
+        current_data = receiptItems.objects.get(id=item_id)
 
-        if 'name' in new_data and new_data['name'] != current_data.name:
+        if new_data['name'] != "" and new_data['name'] != current_data.name:
             current_data.name = new_data['name']
-        if 'quantity' in new_data and new_data['quantity'] != current_data.quantity:
-            current_data.quantity = new_data['quantity']
-        if 'item_price' in new_data and new_data['item_price'] != current_data.item_price:
-            current_data.item_price = new_data['item_price']
+        if new_data['quantity'] != "" and new_data['quantity'] != current_data.quantity:
+            current_data.quantity = float(new_data['quantity'])
+        if new_data['item_price'] != "" and new_data['item_price'] != current_data.item_price:
+            current_data.item_price = float(new_data['item_price'])
         current_data.save()
+        return "done", 200
     except ValidationError:
         return "Data Couldn't Be Fetched", 500
